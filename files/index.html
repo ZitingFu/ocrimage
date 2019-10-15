@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>xxx</title>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/layer/2.3/layer.js"></script>
+	<style>
+		.app{
+			width:80%;
+			position:relative;
+			height:600px;
+			left:10%;
+		}
+		.imgbox{
+			position:absolute;
+			width:75%;
+			height:600px;
+			left:0;
+			overflow-y:scroll;
+			overflow-x:scroll;
+		}
+		.Result{
+			position:absolute;
+			width:20%;
+			min-height:550px;
+			border-radius:10px;
+			background: #0073EB;
+			color: #fff;
+			right:0;
+			top:0;
+			padding:20px;
+			text-align: left;
+			font-size: 14px;
+		}
+		.mask{
+			display: none;
+			position:absolute;
+			background:#000;
+			opacity:0.5;
+			width:75%;
+			height:100%;
+			left:0;
+			z-index: 9999;
+			top:0;
+		}
+		.loding{
+			position:absolute;
+			width:570px;
+			height:570px;
+			left:22%;
+			z-index: 99999;
+		}
+		#logoimgimg{
+			position: absolute;
+			z-index: 999;
+			left: 0;
+		}
+		span{
+			display: inline-block;
+			border:3px solid red;
+			position: absolute;
+			z-index: 999;
+		}
+		div{
+			text-align: center;
+		}
+		table{
+			width:100%;
+		}
+		.title_item{
+			padding:5px 0;
+		}
+		.filebtnbox{
+			position: relative;
+			width:134px;
+			height:48px;
+			margin-top:60px; 
+			left:35%;
+			cursor: pointer;
+		}
+		.filebtn{
+			position: absolute;
+			top:0;
+			left: 0;
+			width:100%;
+			height:100%;
+			z-index: 99999;
+		}
+		#logowidth{
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top:0;
+		    left:0;
+		    outline: none;
+		    background-color: transparent;
+			z-index:99999;
+			opacity: 0; 
+		  }
+	</style>
+</head>
+<body>
+	<div class="app">
+		<div class="mask">
+			<img class="loding" src="https://s2.pailifan.com/excel/excels/1570867579111.gif" alt="">
+			<!-- <span class="msg">短暂提示</span> -->
+		</div>
+		<div class="imgbox">
+			<img id="logoimgimg" src="123.jpg" alt="" >
+		</div>
+		<div class="Result">
+			<h3>常用饮料识别</h3>
+			<table>
+				<tr class="title">
+					<th style="width:70%;">名称</th>
+					<th>置信度</th>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="filebtnbox">
+		<img class="filebtn" src="btn.png" alt="">
+		<input type="file" style="left:0" id="logowidth" name="files">
+  	</div>
+	<script>
+	$(".mask").hide()
+	$("#logowidth").change(function(){
+		$(".mask").show()
+		$(".span_item").remove()
+		$(".title_item").remove()
+		var logowidth = $("#logowidth").get(0).files[0];
+		var upload_image = logowidth.name
+		// b4
+		var imgresult;
+	 	var reader = new FileReader();
+	 	reader.readAsDataURL(logowidth);
+	 	reader.onload=function(e){
+	 		imgresult = e.target.result
+	 	}
+	 	// 二进制流
+	 	data = new FormData();
+        data.append('upload_image', $("#logowidth")[0].files[0]);
+ 	 	$.ajax({
+            type: "post",
+            url: "/doupload",
+            processData: false,
+            contentType: false,
+            data:data,
+            success: function(list){
+            	$("#logoimgimg").get(0).src = imgresult
+                for(var a=0;a<list.results.length;a++){
+		            var span_item = $("<span></span>")
+		            var title_item = $("<tr><td>"+list.results[a].name+"</td><td>"+list.results[a].score.toFixed(2)+"</td></tr>")
+			            span_item.addClass('span_item')
+			            title_item.addClass('title_item')
+			            span_item.css({
+			                'width':list.results[a].location.width+'px',
+			                'height':list.results[a].location.height+'px',
+			                'left':list.results[a].location.left+'px',
+			                'top':list.results[a].location.top+'px',
+			            })
+			            $("#logoimgimg").after(span_item)
+			            $(".title").after(title_item)
+		        }
+		        $(".mask").hide()
+            },
+            error:function() {
+            	$(".mask").hide()
+	            layer.msg('错误提示'); 
+	        }
+        });
+	})
+	</script>
+</body>
+</html>
